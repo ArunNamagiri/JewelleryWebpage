@@ -30,6 +30,7 @@ jobs:
           context: ./backend
           push: true
           tags: arunnamagiri/jewellery:backend
+          platforms: linux/amd64,linux/arm64
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
@@ -37,3 +38,4 @@ jobs:
           context: ./frontend
           push: true
           tags: arunnamagiri/jewellery:frontend
+          platforms: linux/amd64,linux/arm64
