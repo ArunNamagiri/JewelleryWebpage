@@ -1,0 +1,336 @@
+/* ========================================
+   AI JEWELLERY STORE
+   Application Responsive Styles
+======================================== */
+
+/* Main application */
+.app {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* Main content */
+main {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* All images responsive */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Form elements */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+/* Prevent long text from breaking layout */
+* {
+  max-width: 100%;
+}
+
+/* ========================================
+   WELCOME PAGE
+======================================== */
+
+.welcome-page {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 32px 20px;
+
+  background: #f7f5ef;
+
+  box-sizing: border-box;
+}
+
+.welcome-card {
+  width: 100%;
+  max-width: 760px;
+
+  padding: 50px;
+
+  background: #fffdf7;
+
+  border: 1px solid #d8d1c4;
+  border-radius: 18px;
+
+  box-shadow:
+    0 12px 35px rgba(16, 37, 28, 0.08);
+
+  box-sizing: border-box;
+}
+
+/* Welcome heading */
+.welcome-title {
+  color: #10251c;
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 42px;
+  line-height: 1.15;
+
+  margin: 0 0 14px;
+}
+
+/* Subtitle */
+.welcome-subtitle {
+  color: #5f655f;
+  font-size: 17px;
+
+  margin-bottom: 36px;
+}
+
+/* Labels */
+.welcome-card label {
+  display: block;
+
+  color: #10251c;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  text-align: left;
+
+  margin-bottom: 9px;
+}
+
+/* Inputs */
+.welcome-card input {
+  width: 100%;
+  min-height: 58px;
+
+  padding: 14px 18px;
+
+  color: #10251c !important;
+  background: #fffdf7 !important;
+
+  border: 1px solid #c8c2b6;
+  border-radius: 12px;
+
+  outline: none;
+
+  font-size: 17px;
+
+  box-sizing: border-box;
+}
+
+.welcome-card input:focus {
+  border-color: #a77b18;
+
+  box-shadow:
+    0 0 0 3px rgba(167, 123, 24, 0.12);
+}
+
+.welcome-card input::placeholder {
+  color: #77746d !important;
+  opacity: 1 !important;
+}
+
+/* ========================================
+   MOBILE NUMBER
+======================================== */
+
+.mobile-input {
+  width: 100%;
+
+  display: flex;
+
+  overflow: hidden;
+
+  background: #fffdf7;
+
+  border: 1px solid #c8c2b6;
+  border-radius: 12px;
+
+  box-sizing: border-box;
+}
+
+.country-code {
+  min-width: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #10251c;
+
+  background: #f2eee5;
+
+  border-right: 1px solid #c8c2b6;
+
+  flex-shrink: 0;
+}
+
+.mobile-input input {
+  min-width: 0;
+
+  border: none !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
+}
+
+/* ========================================
+   CONTINUE BUTTON
+======================================== */
+
+.continue-button {
+  width: 100%;
+
+  min-height: 58px;
+
+  margin-top: 24px;
+
+  color: #ffffff !important;
+  background: #0b2117 !important;
+
+  border: none;
+  border-radius: 11px;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.continue-button:hover {
+  background: #143a29 !important;
+}
+
+.continue-button:active {
+  transform: translateY(1px);
+}
+
+/* ========================================
+   SECURITY MESSAGE
+======================================== */
+
+.security-message {
+  margin-top: 24px;
+
+  color: #6b706b;
+
+  font-size: 14px;
+}
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 768px) {
+
+  .welcome-page {
+    padding: 20px 16px;
+  }
+
+  .welcome-card {
+    max-width: 620px;
+
+    padding: 36px 28px;
+  }
+
+  .welcome-title {
+    font-size: 36px;
+  }
+
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 480px) {
+
+  .welcome-page {
+    padding: 12px;
+  }
+
+  .welcome-card {
+    width: 100%;
+
+    padding: 28px 18px;
+
+    border-radius: 15px;
+  }
+
+  .welcome-title {
+    font-size: 30px;
+  }
+
+  .welcome-subtitle {
+    font-size: 14px;
+
+    margin-bottom: 28px;
+  }
+
+  .welcome-card input {
+    min-height: 54px;
+
+    padding: 13px 14px;
+
+    font-size: 16px;
+  }
+
+  .country-code {
+    min-width: 68px;
+  }
+
+  .continue-button {
+    min-height: 54px;
+
+    font-size: 16px;
+  }
+
+  .security-message {
+    font-size: 12px;
+  }
+
+}
+
+/* ========================================
+   SMALL PHONE
+======================================== */
+
+@media (max-width: 360px) {
+
+  .welcome-page {
+    padding: 8px;
+  }
+
+  .welcome-card {
+    padding: 22px 14px;
+  }
+
+  .welcome-title {
+    font-size: 27px;
+  }
+
+  .country-code {
+    min-width: 62px;
+  }
+
+}
