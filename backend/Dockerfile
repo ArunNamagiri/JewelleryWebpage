@@ -10,7 +10,6 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy application source.
 COPY src ./src
-COPY uploads ./uploads
 
 # Run as the non-root node user provided by the official image.
 USER node
