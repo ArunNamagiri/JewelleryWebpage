@@ -1,16 +1,16 @@
 services:
   backend:
-    build:
-      context: ./backend
+    image: jewellery-backend-local
+    build: ./backend
     container_name: jewellery-backend
     environment:
       NODE_ENV: production
       PORT: 5000
       FRONTEND_URL: http://localhost:8080
-      ADMIN_PASSWORD_HASH: '$$2b$$12$$p9A7TG3eH.arROOeutE9U.yqmH/CXqs5JZupR/OaZPhGuOMFddSme'
       # Add your database/API variables here or use an env_file locally.
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        format: raw
     ports:
       - "5000:5000"
     volumes:
@@ -24,10 +24,7 @@ services:
       start_period: 20s
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_API_URL: http://localhost:5000
+    image: arunnamagiri/jewellery:frontend
     container_name: jewellery-frontend
     ports:
       - "8080:80"

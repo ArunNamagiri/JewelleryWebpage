@@ -229,12 +229,6 @@ module.exports = function createAdminRouter(pool) {
                     message: "Admin login is not configured on the server",
                 });
             }
-	    console.log("Login debug:", {
-   	    receivedUsername: username,
-            usernameMatches: username === expectedUsername,
-            hashConfigured: Boolean(expectedHash),
-            jwtConfigured: Boolean(process.env.JWT_SECRET),
-            });
             if (username !== expectedUsername) {
                 return res.status(401).json({
                     success: false,
