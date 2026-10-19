@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const { Pool } = require("pg");
@@ -34,6 +34,8 @@ const configuredOrigins = String(process.env.FRONTEND_URL || "")
 const allowedOrigins = new Set([
     "http://localhost:5173",
     "http://localhost:3000",
+    "http://localhost:8080",
+    "https://jewellery-webpage-hlhm.vercel.app",
     ...configuredOrigins,
 ]);
 
@@ -45,6 +47,7 @@ app.use(cors({
         ) {
             callback(null, true);
         } else {
+            console.error("Rejected CORS origin:", origin);
             callback(new Error("Not allowed by CORS"));
         }
     },
@@ -513,12 +516,7 @@ async function fetchGoldRates() {
         return cachedGoldRates;
     }
 
-
-    try {
-
-        console.log(
-            "Calling IBJA gold rate API..."
-        );
+        console.log("Calling IBJA gold rate API...");
 
 
         // ====================================================
@@ -647,6 +645,7 @@ async function fetchGoldRates() {
         }
 
 
+    try{
         // ====================================================
         // 1. GOLD PRICE (goldapi.io if a key is configured,
         //    otherwise the free unauthenticated spot source)
@@ -654,6 +653,7 @@ async function fetchGoldRates() {
 
         let goldUsdPerOunce;
         let spotSourceName;
+        let spotTimestamp = null;
 
         if (process.env.GOLD_API_KEY) {
 
@@ -661,7 +661,7 @@ async function fetchGoldRates() {
 
                 const goldApiIoResponse =
                     await fetch(
-                        "https://www.goldapi.io/api/price/XAU/USD",
+                        "https://www.goldapi.io/api/XAU/USD",
                         {
                             headers: {
                                 "x-access-token":
@@ -684,6 +684,18 @@ async function fetchGoldRates() {
 
                 const goldApiIoData =
                     await goldApiIoResponse.json();
+                const providerTimestamp = Number(goldApiIoData.timestamp);
+
+                if (Number.isFinite(providerTimestamp) && providerTimestamp > 0) {
+                    spotTimestamp = new Date(providerTimestamp * 1000);
+
+                    if (
+                        !Number.isFinite(spotTimestamp.getTime()) ||
+                        spotTimestamp.getTime() > Date.now() + 60_000
+                    ) {
+                        throw new Error("GoldAPI.io returned an invalid timestamp");
+                    }
+                }
 
                 console.log(
                     "GoldAPI.io response:",
@@ -804,7 +816,7 @@ async function fetchGoldRates() {
 
 
         // ====================================================
-        // 3. TROY OUNCE → GRAM
+        // 3. TROY OUNCE  → GRAM
         // ====================================================
 
         const TROY_OUNCE_GRAMS =
@@ -880,11 +892,17 @@ async function fetchGoldRates() {
             source:
                 spotSourceName,
 
-            live:
-                true,
+            source_timestamp: spotTimestamp
+                ? spotTimestamp.toISOString()
+                : null,
 
-            stale:
-                false,
+            live: Boolean(
+                spotTimestamp &&
+                Date.now() - spotTimestamp.getTime() <= 30 * 60 * 1000
+            ),
+
+            stale: !spotTimestamp ||
+                Date.now() - spotTimestamp.getTime() > 30 * 60 * 1000,
 
             synced_at: new Date().toLocaleTimeString("en-IN", {
                 timeZone: "Asia/Kolkata",
@@ -1028,7 +1046,7 @@ async function fetchSilverRates() {
             live: false,
             synced_at: latestUpdatedAt
                 ? latestUpdatedAt.toLocaleTimeString("en-IN")
-                : "—",
+                :"Not available",
             timestamp: latestUpdatedAt ? latestUpdatedAt.toISOString() : null,
         };
 
