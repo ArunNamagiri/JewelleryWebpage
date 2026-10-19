@@ -1,4 +1,3 @@
-
 name: Build and Publish Docker Images
 
 on:
@@ -7,10 +6,18 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -29,13 +36,21 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: arunnamagiri/jewellery:backend
+          tags: |
+            arunnamagiri/jewellery:backend
+            arunnamagiri/jewellery:backend-${{ github.sha }}
           platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
           push: true
-          tags: arunnamagiri/jewellery:frontend
+          tags: |
+            arunnamagiri/jewellery:frontend
+            arunnamagiri/jewellery:frontend-${{ github.sha }}
           platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
