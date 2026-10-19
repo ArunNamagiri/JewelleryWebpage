@@ -586,33 +586,21 @@ async function fetchGoldRates() {
             }
 
             cachedGoldRates = {
-
-                rate_24k:
-                    Math.round(ibjaRate24k * 100) / 100,
-
-                rate_22k:
-                    Math.round(ibjaRate22k * 100) / 100,
-
-                rate_18k:
-                    Math.round(ibjaRate18k * 100) / 100,
-
-                currency:
-                    "INR",
-
-                source:
-                    "IBJA",
-
-                live:
-                    true,
-
-                stale:
-                    false,
-
-                synced_at:
-                    new Date().toLocaleTimeString("en-IN"),
-
-                timestamp:
-                    new Date().toISOString()
+                rate_24k: Math.round(ibjaRate24k * 100) / 100,
+                rate_22k: Math.round(ibjaRate22k * 100) / 100,
+                rate_18k: Math.round(ibjaRate18k * 100) / 100,
+                currency: "INR",
+                source: "IBJA",
+                source_date: sourceDate,
+                live: true,
+                stale: false,
+                synced_at: new Date().toLocaleTimeString("en-IN", {
+                    timeZone: "Asia/Kolkata",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true
+                }),
             };
 
             goldRatesLastFetched = now;
