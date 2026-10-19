@@ -542,9 +542,29 @@ async function fetchGoldRates() {
                     `IBJA API HTTP ${ibjaResponse.status}`
                 );
             }
+            const ibjaData = await ibjaResponse.json();
+            const sourceDate = ibjaData.date;
 
-            const ibjaData =
-                await ibjaResponse.json();
+            if (!sourceDate || !/^\d{4}-\d{2}-\d{2}$/.test(sourceDate)) {
+                throw new Error("IBJA response has an invalid source date");
+            }
+
+            const sourceTimestamp = Date.parse(`${sourceDate}T00:00:00Z`);
+
+            if (
+                !Number.isFinite(sourceTimestamp) ||
+                new Date(sourceTimestamp).toISOString().slice(0, 10) !== sourceDate
+            ) {
+                throw new Error(`Invalid IBJA source date: ${sourceDate}`);
+            }
+
+            const ageInDays = Math.floor(
+                (Date.now() - sourceTimestamp) / (24 * 60 * 60 * 1000)
+            );
+
+            if (ageInDays < 0 || ageInDays > 4) {
+                throw new Error(`IBJA data is too old. Source date: ${sourceDate}`);
+            }
 
             const ibjaRate24k =
                 Number(ibjaData.lblGold999_AM) / 10;
