@@ -592,8 +592,8 @@ async function fetchGoldRates() {
                 currency: "INR",
                 source: "IBJA",
                 source_date: sourceDate,
-                live: true,
-                stale: false,
+                live: ageInDays === 0,
+                stale: ageInDays > 0,
                 synced_at: new Date().toLocaleTimeString("en-IN", {
                     timeZone: "Asia/Kolkata",
                     hour: "2-digit",
