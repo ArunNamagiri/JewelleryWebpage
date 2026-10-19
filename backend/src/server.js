@@ -7,7 +7,8 @@ require("dotenv").config();
 const createAdminRouter = require("./routes/admin");
 const app = express();
 
-app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : false);
+app.set("trust proxy", 1);
+
 const rateLimit = require("express-rate-limit");
 
 const apiLimiter = rateLimit({
@@ -506,7 +507,7 @@ async function fetchGoldRates() {
     if (
         cachedGoldRates &&
         now - goldRatesLastFetched <
-            GOLD_CACHE_MS
+        GOLD_CACHE_MS
     ) {
 
         return cachedGoldRates;
