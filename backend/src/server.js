@@ -601,6 +601,7 @@ async function fetchGoldRates() {
                     second: "2-digit",
                     hour12: true
                 }),
+                timestamp: new Date().toISOString()
             };
 
             goldRatesLastFetched = now;
@@ -885,10 +886,13 @@ async function fetchGoldRates() {
             stale:
                 false,
 
-            synced_at:
-                new Date().toLocaleTimeString(
-                    "en-IN"
-                ),
+            synced_at: new Date().toLocaleTimeString("en-IN", {
+                timeZone: "Asia/Kolkata",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+            }),
 
             timestamp:
                 new Date().toISOString(),
