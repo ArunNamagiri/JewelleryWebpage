@@ -516,35 +516,60 @@ async function fetchGoldRates() {
         return cachedGoldRates;
     }
 
-        console.log("Calling IBJA gold rate API...");
-
+              console.log("Calling SnapData Indian gold rate API...");
 
         // ====================================================
-        // 0. TRY IBJA (REAL INDIAN BULLION RATES)
+        // 0. TRY SNAPDATA (DAILY INDIAN GOLD BENCHMARK)
+        // Rates are already INR per gram.
         // ====================================================
-        // Free, no-auth, unofficial scraper of ibjarates.com.
-        // Rates are per 10 grams, AM session.
-        // https://github.com/0xSaurabhx/IBJA-API
 
         try {
+            const snapResponse = await fetch(
+                "https://snapdata.dev/api/v1/gold/in/latest.json",
+                { signal: AbortSignal.timeout(10000) }
+            );
 
-            const ibjaResponse =
-                await fetch(
-                    "https://ibja-api.vercel.app/latest"
-                );
+            if (!snapResponse.ok) {
+                throw new Error(`SnapData HTTP ${snapResponse.status}`);
+            }
+
+            const snapData = await snapResponse.json();
 
             if (
-                !ibjaResponse.ok
+                snapData.dataset !== "gold" ||
+                snapData.scope !== "in" ||
+                snapData.unit?.currency !== "INR" ||
+                snapData.unit?.quantity !== "gram" ||
+                !Array.isArray(snapData.observations)
             ) {
-                throw new Error(
-                    `IBJA API HTTP ${ibjaResponse.status}`
-                );
+                throw new Error("Invalid SnapData response format");
             }
-            const ibjaData = await ibjaResponse.json();
-            const sourceDate = ibjaData.date;
 
-            if (!sourceDate || !/^\d{4}-\d{2}-\d{2}$/.test(sourceDate)) {
-                throw new Error("IBJA response has an invalid source date");
+            const observations = snapData.observations;
+
+            const rate24 = observations.find(
+                item => item.instrument === "XAU.24K"
+            );
+            const rate22 = observations.find(
+                item => item.instrument === "XAU.22K"
+            );
+            const rate18 = observations.find(
+                item => item.instrument === "XAU.18K"
+            );
+
+            if (!rate24 || !rate22 || !rate18) {
+                throw new Error("SnapData is missing one or more purity rates");
+            }
+
+            const sourceDate = rate24.date;
+
+            if (
+                !sourceDate ||
+                !/^\d{4}-\d{2}-\d{2}$/.test(sourceDate) ||
+                rate22.date !== sourceDate ||
+                rate18.date !== sourceDate
+            ) {
+                throw new Error("Missing, invalid, or inconsistent source dates");
             }
 
             const sourceTimestamp = Date.parse(`${sourceDate}T00:00:00Z`);
@@ -553,34 +578,27 @@ async function fetchGoldRates() {
                 !Number.isFinite(sourceTimestamp) ||
                 new Date(sourceTimestamp).toISOString().slice(0, 10) !== sourceDate
             ) {
-                throw new Error(`Invalid IBJA source date: ${sourceDate}`);
+                throw new Error("Invalid SnapData source date");
             }
 
             const ageInDays = Math.floor(
                 (Date.now() - sourceTimestamp) / (24 * 60 * 60 * 1000)
             );
 
-            if (ageInDays < 0 || ageInDays > 4) {
-                throw new Error(`IBJA data is too old. Source date: ${sourceDate}`);
+            if (ageInDays < 0 || ageInDays > 3) {
+                throw new Error(`SnapData is too old: ${sourceDate}`);
             }
 
-            const ibjaRate24k =
-                Number(ibjaData.lblGold999_AM) / 10;
-
-            const ibjaRate22k =
-                Number(ibjaData.lblGold916_AM) / 10;
-
-            const ibjaRate18k =
-                Number(ibjaData.lblGold750_AM) / 10;
+            const ibjaRate24k = Number(rate24.value);
+            const ibjaRate22k = Number(rate22.value);
+            const ibjaRate18k = Number(rate18.value);
 
             if (
-                !Number.isFinite(ibjaRate24k) ||
-                !Number.isFinite(ibjaRate22k) ||
-                !Number.isFinite(ibjaRate18k)
+                !Number.isFinite(ibjaRate24k) || ibjaRate24k <= 0 ||
+                !Number.isFinite(ibjaRate22k) || ibjaRate22k <= 0 ||
+                !Number.isFinite(ibjaRate18k) || ibjaRate18k <= 0
             ) {
-                throw new Error(
-                    "Invalid IBJA rate data"
-                );
+                throw new Error("SnapData contains invalid gold rates");
             }
 
             cachedGoldRates = {
@@ -588,9 +606,10 @@ async function fetchGoldRates() {
                 rate_22k: Math.round(ibjaRate22k * 100) / 100,
                 rate_18k: Math.round(ibjaRate18k * 100) / 100,
                 currency: "INR",
-                source: "IBJA",
+                source: "SnapData (IBJA daily benchmark)",
                 source_date: sourceDate,
-                live: ageInDays === 0,
+                source_status: rate24.status || "unknown",
+                live: false,
                 stale: ageInDays > 0,
                 synced_at: new Date().toLocaleTimeString("en-IN", {
                     timeZone: "Asia/Kolkata",
@@ -604,44 +623,21 @@ async function fetchGoldRates() {
 
             goldRatesLastFetched = now;
 
-            await saveGoldRatesToNeon(
-                cachedGoldRates
-            );
+            await saveGoldRatesToNeon(cachedGoldRates);
 
-            console.log(
-                "================================="
-            );
-            console.log(
-                "LIVE IBJA GOLD RATE"
-            );
-            console.log(
-                "24K INR/gram:",
-                cachedGoldRates.rate_24k
-            );
-            console.log(
-                "22K INR/gram:",
-                cachedGoldRates.rate_22k
-            );
-            console.log(
-                "18K INR/gram:",
-                cachedGoldRates.rate_18k
-            );
-            console.log(
-                "================================="
-            );
+            console.log("=================================");
+            console.log("SNAPDATA INDIAN DAILY GOLD BENCHMARK");
+            console.log("Source date:", sourceDate);
+            console.log("24K INR/gram:", cachedGoldRates.rate_24k);
+            console.log("22K INR/gram:", cachedGoldRates.rate_22k);
+            console.log("18K INR/gram:", cachedGoldRates.rate_18k);
+            console.log("=================================");
 
             return cachedGoldRates;
 
-        } catch (ibjaError) {
-
-            console.error(
-                "IBJA API error:",
-                ibjaError.message
-            );
-
-            console.log(
-                "Falling back to spot price + premium..."
-            );
+        } catch (snapError) {
+            console.error("SnapData API error:", snapError.message);
+            console.log("Falling back to spot price + premium...");
         }
 
 
